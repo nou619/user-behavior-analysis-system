@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0D1B3E,100:185FA5&height=200&section=header&text=User%20Behavior%20Analysis%20System&fontSize=38&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Automated%20Analytics%20%26%20Alert%20Intelligence%20Pipeline&descAlignY=55&descSize=16" width="100%"/>
+<img src="./assets/banner-header.svg" width="100%"/>
 
 <a href="#"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=800&color=185FA5&center=true&vCenter=true&width=650&lines=Automated+Weekly+%2F+Instant+Alert+Reports;AI-Powered+Alert+Classification+%26+Scoring;PDF+Generation+%2B+Transactional+Email+Delivery;Built+during+a+Data%2FBackend+Internship" alt="Typing SVG" /></a>
 
@@ -274,7 +274,7 @@ python -m functions.jobs.general_report
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:185FA5,100:0D1B3E&height=120&section=footer&animation=fadeIn" width="100%"/>
+<img src="./assets/banner-footer.svg" width="100%"/>
 
 *Built as part of a data/backend internship — shared here with all company & user identifiers removed.*
 
