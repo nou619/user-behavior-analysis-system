@@ -11,6 +11,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Domain](https://img.shields.io/badge/Domain-EdTech-185FA5?style=for-the-badge)
 ![Domain](https://img.shields.io/badge/Domain-AI_in_Medicine-0D1B3E?style=for-the-badge)
+![Firebase](https://img.shields.io/badge/Deployment-Firebase_Cloud_Functions-FFA000?style=for-the-badge&logo=firebase&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Internship_Project-C0392B?style=for-the-badge)
 ![Data](https://img.shields.io/badge/User_Data-Anonymized-0D1B3E?style=for-the-badge&logo=shieldsdotio&logoColor=white)
 ![Snapshot](https://img.shields.io/badge/Repo-Single_Commit_Snapshot-orange?style=for-the-badge&logo=git&logoColor=white)
@@ -55,14 +56,28 @@ Three independent scheduled jobs cover three different reporting needs:
 
 ---
 
+## 🔄 Project Evolution
+
+This system went through a few real iterations rather than being built once and left alone:
+
+- **Data source:** originally pulled data directly from the platform's **admin dashboard**. This was later migrated to a **Google Sheets export** fed by the backend instead, since it decoupled the reporting pipeline from the dashboard's internal API and made the data layer easier to read, validate, and swap out.
+- **Email delivery:** went through three providers before settling. Started with plain **SMTP**, moved to **AWS SES** for better deliverability and scale, and finally switched to the **Brevo (Sendinblue) API** for its simpler transactional API, attachment handling, and reliability for this volume of email. Config for all three stages is still visible in `config.py`, kept as a trace of that evolution.
+- **Deployment:** moved from manual deploys to a **CI/CD pipeline** (GitHub Actions) that pushes each function to Firebase automatically on merge, removing manual `firebase deploy` steps and reducing deployment drift between jobs.
+
+---
+
 ## 🏗️ Architecture
 
 ```mermaid
 flowchart TD
+    Z["🖥️ Platform Backend<br/>(exports activity & alert data)"]
+
     subgraph SRC[" 📄 Data Layer "]
         direction TB
         A[Google Sheets]
     end
+
+    Z --> SRC
 
     subgraph PROC[" ⚙️ Processing "]
         direction TB
@@ -79,12 +94,16 @@ flowchart TD
         E3[OpenAI]
     end
 
-    subgraph JOBS[" ⏱️ Scheduled Jobs "]
+    S["⏰ Cloud Scheduler<br/>(daily / weekly cron)"]
+
+    subgraph JOBS[" ☁️ Firebase Cloud Functions "]
         direction TB
         G[instant_alert.py]
         H[weekly_alert.py]
         I[general_report.py]
     end
+
+    S --> JOBS
 
     subgraph OUT[" 📤 Output "]
         direction TB
@@ -114,6 +133,8 @@ flowchart TD
     classDef inboxStyle fill:#0D1B3E,color:#fff,stroke:#0D1B3E
 
     class A srcStyle
+    class Z inboxStyle
+    class S inboxStyle
     class B,C,D procStyle
     class E1,E2,E3 aiStyle
     class G,H,I jobStyle
@@ -140,8 +161,10 @@ flowchart TD
 | **AI / LLM Providers** | Google Gemini, Groq (Llama 3.3), OpenAI |
 | **PDF Rendering** | WeasyPrint (HTML/CSS → PDF) |
 | **Email Delivery** | Brevo (Sendinblue) Transactional Email API |
-| **Config Management** | `python-dotenv` |
 | **Scheduling** | Cron / scheduled cloud job (daily & weekly triggers) |
+| **Deployment** | Firebase Cloud Functions (Python runtime), triggered on a schedule via Google Cloud Scheduler |
+| **CI/CD** | GitHub Actions — automated deploy to Firebase on merge |
+| **Secrets Management** | Google Cloud Secret Manager (production) / `python-dotenv` (local dev) |
 | **Data Modeling** | Python `dataclasses` (typed `SheetAlert`, `User`, `LeaderboardEntry`...) |
 
 </div>
@@ -197,7 +220,7 @@ user-behavior-analysis-system/
 
 ## ⚙️ Environment Variables
 
-> No real values are shown here — only the variable names your `.env` needs.
+> These are used for **local development only**. In production, the equivalent secrets are stored in **Google Cloud Secret Manager** and injected into each Cloud Function at runtime — no real values are shown here, only the variable names your local `.env` needs.
 
 ```env
 # Google Sheets
@@ -227,6 +250,17 @@ RECIPIENT_EMAIL=
 WEEKLY_MAX_LLM_ALERTS=
 WEEKLY_MAX_REPORT_ALERTS=
 ```
+
+---
+
+## ☁️ Deployment
+
+Each of the three jobs is deployed as an independent **Firebase Cloud Function** (Python runtime), not a long-running server. This keeps the system serverless and cost-efficient — nothing runs (or costs anything) outside of its scheduled window.
+
+- **Trigger:** Google **Cloud Scheduler** fires each function on its own cron schedule — daily for the instant alert report, weekly for the weekly alert and general platform reports.
+- **Isolation:** each job is a self-contained entry point that pulls what it needs from the shared `services/` and `shared/` modules, so one job failing (e.g. an LLM timeout) can't take down the others.
+- **Config & secrets:** in production, API keys and credentials are **not** stored in `.env` files — they're pulled from **Google Cloud Secret Manager** at runtime and injected into each function. `.env` is only used for local development; nothing sensitive is ever committed or hardcoded.
+- **Observability:** each run prints a structured summary (alert counts, critical counts) to Cloud Functions logs, so failures and drift are visible without opening the PDF.
 
 ---
 
