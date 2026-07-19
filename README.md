@@ -4,7 +4,7 @@
 
 ### Automated Analytics & Alert Intelligence Pipeline
 
-<a href="#"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=800&color=185FA5&center=true&vCenter=true&width=650&lines=Automated+Weekly+%2F+Instant+Alert+Reports;AI-Powered+Alert+Classification+%26+Scoring;PDF+Generation+%2B+Transactional+Email+Delivery;Built+during+a+Data%2FBackend+Internship" alt="Typing SVG" /></a>
+<a href="#"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=800&color=185FA5&center=true&vCenter=true&width=650&lines=Automated+Weekly+%2F+Instant+Alert+Reports;AI-Powered+Alert+Classification+%26+Scoring;PDF+Generation+%2B+Transactional+Email+Delivery;Built+during+an+AI+Engineering+Internship" alt="Typing SVG" /></a>
 
 <br/>
 
@@ -23,7 +23,7 @@
 
 ## 🔒 A note before you scroll
 
-> This repository is a **portfolio copy** of an internal analytics system I built during a backend/data internship.
+> This repository is a **portfolio copy** of an internal analytics system I built during an AI engineering internship.
 > The **company name, real user data, and any identifying information have been redacted or anonymized**. Screenshots below have sensitive numbers (student counts, names, emails) **blurred**. Any brand names left inside the code/templates (colors, PDF headers, etc.) are internal placeholders and do **not** represent the actual client.
 >
 > **Why this repo has a single commit:** this is a **snapshot copy-paste** of the original codebase, published here purely to showcase the work. The real project lives in a **private company repository** with a full commit history built over time across **multiple contributors** on the team. This copy intentionally does not reflect that history.
@@ -301,6 +301,6 @@ python -m functions.jobs.general_report
 
 <div align="center">
 
-*Built as part of a data/backend internship — shared here with all company & user identifiers removed.*
+*Built as part of an AI engineering internship — shared here with all company & user identifiers removed.*
 
 </div>
