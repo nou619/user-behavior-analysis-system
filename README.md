@@ -54,26 +54,67 @@ Three independent scheduled jobs cover three different reporting needs:
 ## 🏗️ Architecture
 
 ```mermaid
-flowchart LR
-    A[("📄 Data Source<br/>Google Sheets")] --> B["services/sheets.py<br/>Load & validate records"]
-    B --> C["services/classifier.py<br/>Rule-based scoring"]
-    C --> D{"Critical?"}
-    D -- "Yes" --> E["Multi-LLM Enrichment<br/>Gemini · Groq · OpenAI"]
-    D -- "No" --> F["Included in stats only"]
-    E --> G["jobs/instant_alert.py"]
-    E --> H["jobs/weekly_alert.py"]
-    F --> H
-    B --> I["jobs/general_report.py"]
-    G --> J["HTML → PDF<br/>(WeasyPrint)"]
+flowchart TD
+    subgraph SRC[" 📄 Data Layer "]
+        direction TB
+        A[Google Sheets]
+    end
+
+    subgraph PROC[" ⚙️ Processing "]
+        direction TB
+        B[Load & validate records]
+        C[Rule-based scoring]
+        D{Critical alert?}
+        B --> C --> D
+    end
+
+    subgraph AI[" 🧠 AI Enrichment "]
+        direction LR
+        E1[Gemini]
+        E2[Groq · Llama 3.3]
+        E3[OpenAI]
+    end
+
+    subgraph JOBS[" ⏱️ Scheduled Jobs "]
+        direction TB
+        G[instant_alert.py]
+        H[weekly_alert.py]
+        I[general_report.py]
+    end
+
+    subgraph OUT[" 📤 Output "]
+        direction TB
+        J[HTML → PDF via WeasyPrint]
+        K[Brevo Email API]
+    end
+
+    L[("📬 Stakeholder Inbox")]
+
+    SRC --> PROC
+    D -- Yes --> AI
+    D -- No --> H
+    AI --> E1 & E2 & E3
+    E1 & E2 & E3 --> G
+    E1 & E2 & E3 --> H
+    B --> I
+    G --> J
     H --> J
     I --> J
-    J --> K["services/email.py<br/>Brevo API"]
-    K --> L[("📬 Stakeholder Inbox")]
+    J --> K --> L
 
-    style A fill:#0D1B3E,color:#fff
-    style L fill:#0D1B3E,color:#fff
-    style E fill:#185FA5,color:#fff
-    style J fill:#C0392B,color:#fff
+    classDef srcStyle fill:#0D1B3E,color:#fff,stroke:#0D1B3E
+    classDef procStyle fill:#F4F7FB,color:#172033,stroke:#DCE4EF
+    classDef aiStyle fill:#185FA5,color:#fff,stroke:#185FA5
+    classDef jobStyle fill:#F4F7FB,color:#172033,stroke:#185FA5
+    classDef outStyle fill:#C0392B,color:#fff,stroke:#C0392B
+    classDef inboxStyle fill:#0D1B3E,color:#fff,stroke:#0D1B3E
+
+    class A srcStyle
+    class B,C,D procStyle
+    class E1,E2,E3 aiStyle
+    class G,H,I jobStyle
+    class J,K outStyle
+    class L inboxStyle
 ```
 
 ---
