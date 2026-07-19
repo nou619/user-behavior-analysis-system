@@ -53,68 +53,34 @@ Three independent scheduled jobs cover three different reporting needs:
 
 ## 🏗️ Architecture
 
-```mermaid
-flowchart TD
-    subgraph SRC[" 📄 Data Layer "]
-        direction TB
-        A[Google Sheets]
-    end
-
-    subgraph PROC[" ⚙️ Processing "]
-        direction TB
-        B[Load & validate records]
-        C[Rule-based scoring]
-        D{Critical alert?}
-        B --> C --> D
-    end
-
-    subgraph AI[" 🧠 AI Enrichment "]
-        direction LR
-        E1[Gemini]
-        E2[Groq · Llama 3.3]
-        E3[OpenAI]
-    end
-
-    subgraph JOBS[" ⏱️ Scheduled Jobs "]
-        direction TB
-        G[instant_alert.py]
-        H[weekly_alert.py]
-        I[general_report.py]
-    end
-
-    subgraph OUT[" 📤 Output "]
-        direction TB
-        J[HTML → PDF via WeasyPrint]
-        K[Brevo Email API]
-    end
-
-    L[("📬 Stakeholder Inbox")]
-
-    SRC --> PROC
-    D -- Yes --> AI
-    D -- No --> H
-    AI --> E1 & E2 & E3
-    E1 & E2 & E3 --> G
-    E1 & E2 & E3 --> H
-    B --> I
-    G --> J
-    H --> J
-    I --> J
-    J --> K --> L
-
-    classDef srcStyle fill:#0D1B3E,color:#fff,stroke:#0D1B3E
-    classDef procStyle fill:#F4F7FB,color:#172033,stroke:#DCE4EF
-    classDef aiStyle fill:#185FA5,color:#fff,stroke:#185FA5
-    classDef jobStyle fill:#F4F7FB,color:#172033,stroke:#185FA5
-    classDef outStyle fill:#C0392B,color:#fff,stroke:#C0392B
-    classDef inboxStyle fill:#0D1B3E,color:#fff,stroke:#0D1B3E
-
-    class A srcStyle
-    class B,C,D procStyle
-    class E1,E2,E3 aiStyle
-    class G,H,I jobStyle
-    class J,K outStyle
-    class L inboxStyle
+```
+ 📄 Google Sheets
+        │
+        ▼
+ ⚙️  Load & validate records  (services/sheets.py)
+        │
+        ▼
+ ⚙️  Rule-based scoring       (services/classifier.py)
+        │
+        ├──► Not critical ─────────────────────────┐
+        │                                           │
+        ▼                                           │
+ 🧠 Multi-LLM enrichment                             │
+    (Gemini · Groq · OpenAI)                        │
+        │                                           │
+        ├──► jobs/instant_alert.py                  │
+        └──► jobs/weekly_alert.py  ◄─────────────────┘
+                     │
+ ⏱️  jobs/general_report.py (runs independently on raw data)
+                     │
+                     ▼
+        🖨️  HTML → PDF  (WeasyPrint)
+                     │
+                     ▼
+        📧  Brevo Email API  (services/email.py)
+                     │
+                     ▼
+        📬  Stakeholder Inbox
 ```
 
 ---
