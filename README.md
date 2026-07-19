@@ -1,6 +1,8 @@
 <div align="center">
 
-<img src="./assets/banner-header.svg" width="100%"/>
+# 🩺 User Behavior Analysis System
+
+### Automated Analytics & Alert Intelligence Pipeline
 
 <a href="#"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=800&color=185FA5&center=true&vCenter=true&width=650&lines=Automated+Weekly+%2F+Instant+Alert+Reports;AI-Powered+Alert+Classification+%26+Scoring;PDF+Generation+%2B+Transactional+Email+Delivery;Built+during+a+Data%2FBackend+Internship" alt="Typing SVG" /></a>
 
@@ -239,8 +241,6 @@ python -m functions.jobs.general_report
 ---
 
 <div align="center">
-
-<img src="./assets/banner-footer.svg" width="100%"/>
 
 *Built as part of a data/backend internship — shared here with all company & user identifiers removed.*
 
