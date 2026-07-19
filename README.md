@@ -9,6 +9,8 @@
 <br/>
 
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Domain](https://img.shields.io/badge/Domain-EdTech-185FA5?style=for-the-badge)
+![Domain](https://img.shields.io/badge/Domain-AI_in_Medicine-0D1B3E?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Internship_Project-C0392B?style=for-the-badge)
 ![Data](https://img.shields.io/badge/User_Data-Anonymized-0D1B3E?style=for-the-badge&logo=shieldsdotio&logoColor=white)
 ![Snapshot](https://img.shields.io/badge/Repo-Single_Commit_Snapshot-orange?style=for-the-badge&logo=git&logoColor=white)
@@ -29,7 +31,7 @@
 
 ## 📖 Overview
 
-This system automates **behavioral analytics and quality-alert reporting** for an e-learning platform (quiz/course based). It reads raw activity & alert data from a data source (Google Sheets, fed by the platform's backend), runs it through a **rule-based + LLM classification pipeline**, and produces polished **PDF reports** that are emailed automatically to stakeholders — no manual work required.
+This system sits at the intersection of **EdTech** and **AI in medical education** — it automates **behavioral analytics and quality-alert reporting** for a medical e-learning platform (quiz/course based, used by medical students preparing exams). It reads raw activity & alert data from a data source (Google Sheets, fed by the platform's backend), runs it through a **rule-based + LLM classification pipeline** to catch flawed exam questions and content-quality issues, and produces polished **PDF reports** that are emailed automatically to stakeholders — no manual work required.
 
 Three independent scheduled jobs cover three different reporting needs:
 
@@ -55,34 +57,68 @@ Three independent scheduled jobs cover three different reporting needs:
 
 ## 🏗️ Architecture
 
-```
- 📄 Google Sheets
-        │
-        ▼
- ⚙️  Load & validate records  (services/sheets.py)
-        │
-        ▼
- ⚙️  Rule-based scoring       (services/classifier.py)
-        │
-        ├──► Not critical ─────────────────────────┐
-        │                                           │
-        ▼                                           │
- 🧠 Multi-LLM enrichment                             │
-    (Gemini · Groq · OpenAI)                        │
-        │                                           │
-        ├──► jobs/instant_alert.py                  │
-        └──► jobs/weekly_alert.py  ◄─────────────────┘
-                     │
- ⏱️  jobs/general_report.py (runs independently on raw data)
-                     │
-                     ▼
-        🖨️  HTML → PDF  (WeasyPrint)
-                     │
-                     ▼
-        📧  Brevo Email API  (services/email.py)
-                     │
-                     ▼
-        📬  Stakeholder Inbox
+```mermaid
+flowchart TD
+    subgraph SRC[" 📄 Data Layer "]
+        direction TB
+        A[Google Sheets]
+    end
+
+    subgraph PROC[" ⚙️ Processing "]
+        direction TB
+        B[Load & validate records]
+        C[Rule-based scoring]
+        D{Critical alert?}
+        B --> C --> D
+    end
+
+    subgraph AI[" 🧠 AI Enrichment "]
+        direction LR
+        E1[Gemini]
+        E2[Groq · Llama 3.3]
+        E3[OpenAI]
+    end
+
+    subgraph JOBS[" ⏱️ Scheduled Jobs "]
+        direction TB
+        G[instant_alert.py]
+        H[weekly_alert.py]
+        I[general_report.py]
+    end
+
+    subgraph OUT[" 📤 Output "]
+        direction TB
+        J[HTML → PDF via WeasyPrint]
+        K[Brevo Email API]
+    end
+
+    L[("📬 Stakeholder Inbox")]
+
+    SRC --> PROC
+    D -- Yes --> AI
+    D -- No --> H
+    AI --> E1 & E2 & E3
+    E1 & E2 & E3 --> G
+    E1 & E2 & E3 --> H
+    B --> I
+    G --> J
+    H --> J
+    I --> J
+    J --> K --> L
+
+    classDef srcStyle fill:#0D1B3E,color:#fff,stroke:#0D1B3E
+    classDef procStyle fill:#F4F7FB,color:#172033,stroke:#DCE4EF
+    classDef aiStyle fill:#185FA5,color:#fff,stroke:#185FA5
+    classDef jobStyle fill:#F4F7FB,color:#172033,stroke:#185FA5
+    classDef outStyle fill:#C0392B,color:#fff,stroke:#C0392B
+    classDef inboxStyle fill:#0D1B3E,color:#fff,stroke:#0D1B3E
+
+    class A srcStyle
+    class B,C,D procStyle
+    class E1,E2,E3 aiStyle
+    class G,H,I jobStyle
+    class J,K outStyle
+    class L inboxStyle
 ```
 
 ---
@@ -139,32 +175,21 @@ user-behavior-analysis-system/
 ## 📸 Screenshots
 
 > All figures below (student counts, names, emails, scores) are **blurred** to protect real user data.
-> Replace the placeholders below with your own blurred screenshots.
 
 <div align="center">
 
-<!-- 🖼️ Screenshot 1 — General Platform Report (page 1: KPIs + AI Executive Brief) -->
-<img src="https://via.placeholder.com/850x480/0D1B3E/FFFFFF?text=Screenshot+1+%E2%80%94+Platform+Report+%28blur+numbers%29" width="80%"/>
+<!-- 🖼️ Screenshot 1 -->
+<img src="./assets/1.png" width="80%"/>
 
 <br/><br/>
 
-<!-- 🖼️ Screenshot 2 — Weekly Alert Report (critical case card) -->
-<img src="https://via.placeholder.com/850x480/185FA5/FFFFFF?text=Screenshot+2+%E2%80%94+Weekly+Alert+Report+%28blur+names%29" width="80%"/>
+<!-- 🖼️ Screenshot 2 -->
+<img src="./assets/2.png" width="80%"/>
 
 <br/><br/>
 
-<!-- 🖼️ Screenshot 3 — Instant Alert Report (multi-LLM verdicts) -->
-<img src="https://via.placeholder.com/850x480/C0392B/FFFFFF?text=Screenshot+3+%E2%80%94+Instant+Alert+Report" width="80%"/>
-
-<br/><br/>
-
-<!-- 🖼️ Screenshot 4 — Email delivery / inbox view -->
-<img src="https://via.placeholder.com/850x480/667085/FFFFFF?text=Screenshot+4+%E2%80%94+Email+Delivery+%28blur+addresses%29" width="80%"/>
-
-<br/><br/>
-
-<!-- 🖼️ Screenshot 5 — Google Sheet data source (blur all rows) -->
-<img src="https://via.placeholder.com/850x480/DCE4EF/172033?text=Screenshot+5+%E2%80%94+Raw+Data+Source+%28fully+blurred%29" width="80%"/>
+<!-- 🖼️ Screenshot 3 -->
+<img src="./assets/3.png" width="80%"/>
 
 </div>
 
