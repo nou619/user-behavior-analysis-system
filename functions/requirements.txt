@@ -1,0 +1,8 @@
+firebase-functions
+firebase-admin
+google-cloud-secret-manager
+python-dotenv
+gspread
+google-auth
+requests
+weasyprint
